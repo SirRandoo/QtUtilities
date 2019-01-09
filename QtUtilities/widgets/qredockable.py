@@ -22,7 +22,9 @@
 # the GNU Lesser General Public License
 # along with QtUtilities.
 # If not, see <http://www.gnu.org/licenses/>.
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtGui, QtWidgets
+
+__all__ = {"QRedockable"}
 
 
 class QRedockable(QtWidgets.QDockWidget):

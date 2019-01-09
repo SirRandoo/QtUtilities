@@ -1,33 +1,36 @@
-#  This file is part of QtUtilities.
+# This file is part of QtUtilities.
 #
-#  QtUtilities is free software: you can
-#  redistribute it and/or modify it under the
-#  terms of the GNU Lesser General Public
-#  License as published by the Free Software
-#  Foundation, either version 3 of the License,
-#  or (at your option) any later version.
+# QtUtilities is free software:
+# you can redistribute it
+# and/or modify it under the
+# terms of the GNU Lesser General
+# Public License as published by
+# the Free Software Foundation,
+# either version 3 of the License,
+# or (at your option) any later
+# version.
 #
-#  QtUtilities is distributed in the hope
-#  that it will be useful, but WITHOUT ANY
-#  WARRANTY; without even the implied warranty
-#  of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-#  PURPOSE.  See the GNU Lesser General Public
-#  License for more details.
+# QtUtilities is distributed in
+# the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without
+# even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more
+# details.
 #
-#  You should have received a copy of the GNU
-#  General Lesser Public License along with
-#  QtUtilities.  If not,
-#  see <http://www.gnu.org/licenses/>.
-#
-#  Author: RandomShovel
-#  File Creation Date: 7/22/2017
+# You should have received a copy of the
+# GNU Lesser General Public License along
+# with QtUtilities.  If not,
+# see <https://www.gnu.org/licenses/>.
+import functools
 import io
 import json
+import typing
 
 from PyQt5 import QtCore, QtNetwork
 
-
-__all__ = ["Response"]
+__all__ = {"Response"}
 
 
 class Response:
@@ -39,16 +42,17 @@ class Response:
     
     def __init__(self):
         #  Internal attributes  #
-        self._urls = list()
-        self._params = dict()
-        self._host = str()
-        self._scheme = str()
-        self._domain = str()
-        self._port = int()
-        self._cookies = list()
+        self._urls: list = []
+        self._params: dict = {}
+        self._host: str = None
+        self._scheme: str = None
+        self._domain: str = None
+        self._port: int = None
+        self._cookies: list = []
         self._content = io.BytesIO()
-        self._headers = list()
-        self._error_code = int()
+        self._headers: list = []
+        self._error_code: int = QtNetwork.QNetworkReply.NoError
+        self._error_string: str = None
     
     #  Data Methods  #
     def was_redirected(self) -> bool:
@@ -59,9 +63,9 @@ class Response:
     def is_ok(self) -> bool:
         """Returns whether or not the request's
         status code is OK."""
-        return self._error_code == 0
+        return self._error_code == QtNetwork.QNetworkReply.NoError
     
-    def json(self, encoder = None) -> dict:
+    def json(self, encoder=None) -> dict:
         """Attempts to encode the content into a
         JSON object.  For error handling, refer
         to the passed encoder or `json.loads`."""
@@ -83,6 +87,15 @@ class Response:
         """Returns the raw data received from
         the request as a string"""
         return self.raw().decode()
+    
+    # Error Methods #
+    def error_code(self) -> int:
+        """Returns the error code, if any."""
+        return self._error_code
+    
+    def error_string(self) -> typing.Optional[str]:
+        """Returns the error string, if any."""
+        return self._error_string
     
     # Properties  #
     @property
@@ -128,10 +141,12 @@ class Response:
         
         loop = QtCore.QEventLoop()
         reply.metaDataChanged.connect(
-                lambda: self._headers.append(
-                        {hKey.data().decode(): hValue.data().decode() for hKey, hValue in reply.rawHeaderPairs()}))
+            lambda: self._headers.append(
+                {hKey.data().decode(): hValue.data().decode() for hKey, hValue in reply.rawHeaderPairs()}))
         reply.redirected.connect(lambda x: self._urls.append(x))
         reply.finished.connect(loop.quit)
+        reply.error.connect(functools.partial(setattr, self, '_error_code'))
+        reply.error.connect(lambda: setattr(self, '_error_string', reply.errorString()))
         loop.exec()
         
         self._strip_reply(reply)
@@ -152,20 +167,20 @@ class Response:
             self._content = io.BytesIO(reply.readAll())
         
         # Cookies
-        manager = reply.manager()  # type: QtNetwork.QNetworkAccessManager
-        jar = manager.cookieJar()  # type: QtNetwork.QNetworkCookieJar
+        manager: QtNetwork.QNetworkAccessManager = reply.manager()
+        jar: QtNetwork.QNetworkCookieJar = manager.cookieJar()
         cookies = {cookie.name().data().decode(): cookie.value() for cookie in jar.allCookies()}
         
         if cookies != self.cookies:
             self._cookies.append(cookies)
         
         # Request
-        request = reply.request()  # type: QtNetwork.QNetworkRequest
+        request: QtNetwork.QNetworkRequest = reply.request()
         headers = {hKey.data().decode(): request.rawHeader(hKey).data().decode() for hKey in request.rawHeaderList()}
         
         if self._urls:
             if self._urls[0] != request.url():
-                self._urls.append(request.url())
+                self._urls.insert(0, request.url())
         
         else:
             self._urls.append(request.url())

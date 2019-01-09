@@ -1,31 +1,33 @@
-#  This file is part of QtUtilities.
+# This file is part of QtUtilities.
 #
-#  QtUtilities is free software: you can
-#  redistribute it and/or modify it under the
-#  terms of the GNU Lesser General Public
-#  License as published by the Free Software
-#  Foundation, either version 3 of the License,
-#  or (at your option) any later version.
+# QtUtilities is free software:
+# you can redistribute it
+# and/or modify it under the
+# terms of the GNU Lesser General
+# Public License as published by
+# the Free Software Foundation,
+# either version 3 of the License,
+# or (at your option) any later
+# version.
 #
-#  QtUtilities is distributed in the hope
-#  that it will be useful, but WITHOUT ANY
-#  WARRANTY; without even the implied warranty
-#  of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-#  PURPOSE.  See the GNU Lesser General Public
-#  License for more details.
+# QtUtilities is distributed in
+# the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without
+# even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more
+# details.
 #
-#  You should have received a copy of the GNU
-#  General Lesser Public License along with
-#  QtUtilities.  If not,
-#  see <http://www.gnu.org/licenses/>.
-#
-# Author: RandomShovel
-# File Date: 9/7/2017
+# You should have received a copy of the
+# GNU Lesser General Public License along
+# with QtUtilities.  If not,
+# see <https://www.gnu.org/licenses/>.
 import sys
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
-__all__ = ["QSlideButton"]
+__all__ = {"QSlideButton"}
 
 
 class QSlideButton(QtWidgets.QAbstractButton):
@@ -98,22 +100,22 @@ class QSlideButton(QtWidgets.QAbstractButton):
                     painter.fillRect(self.rect(), self.buttonBackgroundColor)
                     painter.fillRect(self.rect(), self.buttonForegroundColor)
                     painter.fillRect(QtCore.QRect(
-                            self.buttonXOffset,
-                            self.ButtonPadding,
-                            widthDistance - self.ButtonPadding * 2,
-                            self.height() - self.ButtonPadding * 2
+                        self.buttonXOffset,
+                        self.ButtonPadding,
+                        widthDistance - self.ButtonPadding * 2,
+                        self.height() - self.ButtonPadding * 2
                     ), self.buttonColor)
                 
                 elif self.isCircular():
                     path.addRoundedRect(QtCore.QRectF(self.rect()), self.RoundedRadius, self.height() // 2)
                     painter.fillPath(path, self.buttonBackgroundColor)
                     painter.fillPath(path, self.buttonForegroundColor)
-    
+                    
                     path2.addEllipse(QtCore.QRectF(
-                            self.buttonXOffset,
-                            self.ButtonPadding,
-                            self.height() - self.ButtonPadding * 2,
-                            self.height() - self.ButtonPadding * 2
+                        self.buttonXOffset,
+                        self.ButtonPadding,
+                        self.height() - self.ButtonPadding * 2,
+                        self.height() - self.ButtonPadding * 2
                     ))
                     
                     painter.fillPath(path2, self.buttonColor)
@@ -150,18 +152,18 @@ class QSlideButton(QtWidgets.QAbstractButton):
                 
                 if self.isChecked():
                     switch_rect = QtCore.QRect(
-                            widthDistance + self.ButtonPadding,  # X Position
-                            self.ButtonPadding,  # Y Position
-                            widthDistance - self.ButtonPadding * 2,  # Width
-                            self.height() - self.ButtonPadding * 2  # Height
+                        widthDistance + self.ButtonPadding,  # X Position
+                        self.ButtonPadding,  # Y Position
+                        widthDistance - self.ButtonPadding * 2,  # Width
+                        self.height() - self.ButtonPadding * 2  # Height
                     )
                 
                 else:
                     switch_rect = QtCore.QRect(
-                            self.ButtonPadding,  # X Position
-                            self.ButtonPadding,  # Y Position
-                            widthDistance - self.ButtonPadding * 2,  # Width
-                            self.height() - self.ButtonPadding * 2  # Height
+                        self.ButtonPadding,  # X Position
+                        self.ButtonPadding,  # Y Position
+                        widthDistance - self.ButtonPadding * 2,  # Width
+                        self.height() - self.ButtonPadding * 2  # Height
                     )
                 
                 if not self.isCircular():
@@ -169,10 +171,10 @@ class QSlideButton(QtWidgets.QAbstractButton):
                 
                 elif self.isCircular():
                     path2.addEllipse(QtCore.QRectF(
-                            self.buttonXOffset,
-                            self.ButtonPadding,
-                            self.height() - self.ButtonPadding * 2,
-                            self.height() - self.ButtonPadding * 2
+                        self.buttonXOffset,
+                        self.ButtonPadding,
+                        self.height() - self.ButtonPadding * 2,
+                        self.height() - self.ButtonPadding * 2
                     ))
                     
                     painter.fillPath(path2, self.buttonColor)
@@ -198,6 +200,6 @@ class QSlideButton(QtWidgets.QAbstractButton):
     
     def maximumSize(self) -> QtCore.QSize:
         return QtCore.QSize(sys.maxsize, sys.maxsize)
-
+    
     def minimumSize(self) -> QtCore.QSize:
         return QtCore.QSize(0, 0)

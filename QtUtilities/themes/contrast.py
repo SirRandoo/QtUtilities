@@ -1,0 +1,59 @@
+# This file is part of QtUtilities.
+#
+# QtUtilities is free software:
+# you can redistribute it
+# and/or modify it under the
+# terms of the GNU Lesser General
+# Public License as published by
+# the Free Software Foundation,
+# either version 3 of the License,
+# or (at your option) any later
+# version.
+#
+# QtUtilities is distributed in
+# the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without
+# even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the
+# GNU Lesser General Public License along
+# with QtUtilities.  If not,
+# see <https://www.gnu.org/licenses/>.
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class HighContrast:
+    """Transforms the application's palette into a darker, higher contrast look."""
+    
+    @classmethod
+    def apply(cls, app: QtWidgets.QWidget):
+        """Applies the theme."""
+        # Declarations #
+        palette = QtGui.QPalette()
+        qcolor = QtGui.QColor
+        yellow: QtGui.QColor = qcolor(QtCore.Qt.yellow)
+        dark_yellow: QtGui.QColor = qcolor(QtCore.Qt.darkYellow)
+        light_yellow: QtGui.QColor = yellow.lighter()
+        
+        # Color Assignments #
+        palette.setColor(palette.Window, qcolor(10, 10, 10))
+        palette.setColor(palette.WindowText, yellow)
+        palette.setColor(palette.Base, qcolor(50, 50, 50))
+        palette.setColor(palette.AlternateBase, qcolor(65, 65, 65))
+        palette.setColor(palette.ToolTipBase, qcolor(90, 90, 90))
+        palette.setColor(palette.ToolTipText, yellow)
+        palette.setColor(palette.Text, yellow)
+        palette.setColor(palette.Button, qcolor(40, 40, 40))
+        palette.setColor(palette.ButtonText, yellow)
+        palette.setColor(palette.BrightText, light_yellow)
+        palette.setColor(palette.Link, light_yellow)
+        palette.setColor(palette.LinkVisited, yellow)
+        
+        palette.setColor(palette.Disabled, palette.Text, dark_yellow)
+        palette.setColor(palette.Disabled, palette.ButtonText, dark_yellow)
+        
+        app.setPalette(palette)

@@ -1,34 +1,34 @@
-#  This file is part of QtUtilities.
+# This file is part of QtUtilities.
 #
-#  QtUtilities is free software: you can
-#  redistribute it and/or modify it under the
-#  terms of the GNU Lesser General Public
-#  License as published by the Free Software
-#  Foundation, either version 3 of the License,
-#  or (at your option) any later version.
+# QtUtilities is free software:
+# you can redistribute it
+# and/or modify it under the
+# terms of the GNU Lesser General
+# Public License as published by
+# the Free Software Foundation,
+# either version 3 of the License,
+# or (at your option) any later
+# version.
 #
-#  QtUtilities is distributed in the hope
-#  that it will be useful, but WITHOUT ANY
-#  WARRANTY; without even the implied warranty
-#  of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-#  PURPOSE.  See the GNU Lesser General Public
-#  License for more details.
+# QtUtilities is distributed in
+# the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without
+# even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more
+# details.
 #
-#  You should have received a copy of the GNU
-#  General Lesser Public License along with
-#  QtUtilities.  If not,
-#  see <http://www.gnu.org/licenses/>.
-#
-# Author: RandomShovel
-# File Date: 9/8/2017
-import random
+# You should have received a copy of the
+# GNU Lesser General Public License along
+# with QtUtilities.  If not,
+# see <https://www.gnu.org/licenses/>.
 import sys
 import traceback
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-
-__all__ = ["QGauge"]
+__all__ = {"QGauge"}
 
 
 class QGauge(QtWidgets.QWidget):
@@ -65,30 +65,30 @@ class QGauge(QtWidgets.QWidget):
             
             gaugeBack.moveTo(QtCore.QPointF(gaugeRect.center().x(), gaugeRect.center().y() - self.gaugePadding()))
             gaugeBack.arcTo(QtCore.QRectF(
-                    gaugeRect.x() + self.gaugePadding(),
-                    gaugeRect.y() + self.gaugePadding(),
-                    gaugeRect.width() - self.gaugePadding() * 2,
-                    gaugeRect.height() - self.gaugePadding() * 4
+                gaugeRect.x() + self.gaugePadding(),
+                gaugeRect.y() + self.gaugePadding(),
+                gaugeRect.width() - self.gaugePadding() * 2,
+                gaugeRect.height() - self.gaugePadding() * 4
             ), -270 - self.__gaugeDepthAngle / 2, self.__gaugeDepthAngle)
             gaugeBack.closeSubpath()
             painter.fillPath(gaugeBack, self.gaugeBackgroundColor())
             
             gaugeFore.moveTo(QtCore.QPointF(gaugeRect.center().x(), gaugeRect.center().y() - self.gaugePadding()))
             gaugeFore.arcTo(QtCore.QRectF(
-                    gaugeRect.x() + self.gaugePadding(),
-                    gaugeRect.y() + self.gaugePadding(),
-                    gaugeRect.width() - self.gaugePadding() * 2,
-                    gaugeRect.height() - self.gaugePadding() * 4
+                gaugeRect.x() + self.gaugePadding(),
+                gaugeRect.y() + self.gaugePadding(),
+                gaugeRect.width() - self.gaugePadding() * 2,
+                gaugeRect.height() - self.gaugePadding() * 4
             ), 360 - self.__gaugeDepthAngle / 2, -(self.__gaugeDepthAngle * self.value() / self.maximum()))
             gaugeFore.closeSubpath()
             painter.fillPath(gaugeFore, self.gaugeColor())
             
             basePFore.moveTo(gaugeRect.center())
             basePFore.arcTo(QtCore.QRectF(
-                    gaugeRect.x() + self.gaugePadding() * 8,
-                    gaugeRect.y() + self.gaugePadding() * 8,
-                    gaugeRect.width() - self.gaugePadding() * 16,
-                    gaugeRect.height() - self.gaugePadding() * 16
+                gaugeRect.x() + self.gaugePadding() * 8,
+                gaugeRect.y() + self.gaugePadding() * 8,
+                gaugeRect.width() - self.gaugePadding() * 16,
+                gaugeRect.height() - self.gaugePadding() * 16
             ), 0, 360)
             basePFore.closeSubpath()
             painter.fillPath(basePFore, self.basePlateColor())
@@ -114,10 +114,10 @@ class QGauge(QtWidgets.QWidget):
                 painter.setPen(QtGui.QPen(self.textColor().darker()))
                 
                 textRect = QtCore.QRectF(
-                        (gaugeRect.width() / 2) - painter.fontMetrics().width(self.text()) / 2,
-                        (textHeight / 2) - (painter.fontMetrics().height() / 2),
-                        textWidth,
-                        textHeight
+                    (gaugeRect.width() / 2) - painter.fontMetrics().width(self.text()) / 2,
+                    (textHeight / 2) - (painter.fontMetrics().height() / 2),
+                    textWidth,
+                    textHeight
                 )
                 painter.drawText(textRect, self.text(), QtGui.QTextOption())
         

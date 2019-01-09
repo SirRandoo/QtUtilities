@@ -1,27 +1,34 @@
 # This file is part of QtUtilities.
 #
-# QtUtilities is free software: you can
-# redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public
-# License as published by the Free Software
-# Foundation, either version 3 of the License,
-# or (at your option) any later version.
+# QtUtilities is free software:
+# you can redistribute it
+# and/or modify it under the
+# terms of the GNU Lesser General
+# Public License as published by
+# the Free Software Foundation,
+# either version 3 of the License,
+# or (at your option) any later
+# version.
 #
-# QtUtilities is distributed in the hope
-# that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty
-# of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-# PURPOSE.  See the GNU Lesser General Public
-# License for more details.
+# QtUtilities is distributed in
+# the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without
+# even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more
+# details.
 #
-# You should have received a copy of the GNU
-# Lesser General Public License along with
-# QtUtilities.  If not,
-# see <http://www.gnu.org/licenses/>.
-#
-# Author: RandomShovel
-# File Date: 12/25/2017
-from PyQt5 import QtWidgets
+# You should have received a copy of the
+# GNU Lesser General Public License along
+# with QtUtilities.  If not,
+# see <https://www.gnu.org/licenses/>.
+import logging
+
+from PyQt5 import QtCore, QtWidgets, sip
+
+__all__ = {'append_table', 'clear_table', 'populate_table', 'safe_clear_table',
+           'set_table_headers', 'should_create_widget', 'qmessage_handler'}
 
 
 # Table Functions #
@@ -57,6 +64,9 @@ def safe_clear_table(table: QtWidgets.QTableWidget, headers: list = None):
         if header not in _current_headers:
             _current_headers.append(header)
     
+    table.clear()
+    table.setRowCount(0)
+    
     for index, header in enumerate(_current_headers):
         table.setHorizontalHeaderItem(index, QtWidgets.QTableWidgetItem(str(header)))
 
@@ -73,7 +83,7 @@ def set_table_headers(table: QtWidgets.QTableWidget, headers: list):
         table.setHorizontalHeaderItem(index, QtWidgets.QTableWidgetItem(str(header)))
 
 
-def append_table(table: QtWidgets.QTableWidget, data: dict):
+def append_table(table: QtWidgets.QTableWidget, **data):
     """Appends the supplied data to the table.
 
     :param table is the QTableWidget to modify
@@ -138,3 +148,98 @@ def populate_table(table: QtWidgets.QTableWidget, data: dict):
     
     else:
         raise ValueError
+
+
+def should_create_widget(widget: QtWidgets.QWidget = None) -> bool:
+    """Returns whether or not the widget should be recreated."""
+    if widget is not None:
+        return sip.isdeleted(widget)
+    
+    else:
+        return True
+
+
+# Message Handlers
+def qmessage_handler(message_type: int, context: QtCore.QMessageLogContext, message: str):
+    """A custom message handler for wrapping Qt5's log messages with
+    Python's logging module."""
+    logger = logging.getLogger('Qt5')
+    
+    if message_type == QtCore.QtDebugMsg:
+        record = logger.makeRecord(
+            name='Qt5',
+            level=logging.DEBUG,
+            fn=getattr(context, 'function', 'undefined'),
+            lno=getattr(context, 'line', -1),
+            msg=message,
+            args={},
+            exc_info=None
+        )
+    
+    elif message_type == QtCore.QtCriticalMsg:
+        record = logger.makeRecord(
+            name='Qt5',
+            level=logging.CRITICAL,
+            fn=getattr(context, 'function', 'undefined'),
+            lno=getattr(context, 'line', -1),
+            msg=message,
+            args={},
+            exc_info=None
+        )
+    
+    elif message_type == QtCore.QtWarningMsg:
+        record = logger.makeRecord(
+            name='Qt5',
+            level=logging.WARNING,
+            fn=getattr(context, 'function', 'undefined'),
+            lno=getattr(context, 'line', -1),
+            msg=message,
+            args={},
+            exc_info=None
+        )
+    
+    elif message_type == QtCore.QtInfoMsg:
+        record = logger.makeRecord(
+            name='Qt5',
+            level=logging.INFO,
+            fn=getattr(context, 'function', 'undefined'),
+            lno=getattr(context, 'line', -1),
+            msg=message,
+            args={},
+            exc_info=None
+        )
+    
+    elif message_type == QtCore.QtFatalMsg:
+        record = logger.makeRecord(
+            name='Qt5',
+            level=logging.FATAL,
+            fn=getattr(context, 'function', 'undefined'),
+            lno=getattr(context, 'line', -1),
+            msg=message,
+            args={},
+            exc_info=None
+        )
+    
+    elif message_type == QtCore.QtSystemMsg:
+        record = logger.makeRecord(
+            name='Qt5',
+            level=logging.INFO,
+            fn=getattr(context, 'function', 'undefined'),
+            lno=getattr(context, 'line', -1),
+            msg=message,
+            args={},
+            exc_info=None
+        )
+    
+    else:
+        record = logger.makeRecord(
+            name='Qt5',
+            level=logging.NOTSET,
+            fn=getattr(context, 'function', 'undefined'),
+            lno=getattr(context, 'line', -1),
+            msg=message,
+            args={},
+            exc_info=None
+        )
+    
+    logger.handle(record)

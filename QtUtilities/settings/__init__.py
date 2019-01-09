@@ -22,8 +22,8 @@
 # the GNU Lesser General Public License
 # along with QtUtilities.
 # If not, see <http://www.gnu.org/licenses/>.
-from .converter import Converter
-from .core import QSettings
-from .domain import Domain
-from .option import Option
-from .section import Section
+from . import converters
+from .display import Display
+from .setting import Setting
+
+__all__ = {'Setting', 'Display', 'converters'}

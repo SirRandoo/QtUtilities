@@ -23,12 +23,5 @@
 # GNU Lesser General Public License along
 # with QtUtilities.  If not,
 # see <https://www.gnu.org/licenses/>.
-from .qanimatedsplash import QAnimatedSplash
-from .qcircleprogressbar import QCircleProgressBar
-from .qgauge import QGauge
-from .qpopoutoverlay import QPopoutOverlay
-from .qredockable import QRedockable
-from .qslidebutton import QSlideButton
-
-__all__ = {"QAnimatedSplash", "QCircleProgressBar", "QGauge", "QPopoutOverlay",
-           "QRedockable", "QSlideButton"}
+from .contrast import HighContrast
+from .dark import Dark
