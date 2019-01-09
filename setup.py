@@ -26,13 +26,19 @@
 from distutils.core import setup
 
 setup(
-        name='QtUtilities',
-        version='0.1.0a',
-        packages=['QtUtilities', 'QtUtilities.requests', 'QtUtilities.widgets'],
-        url='https://www.github.com/SirRandoo/QtUtilities',
-        license='LGPLv3+',
-        author='SirRandoo',
-        author_email='',
-        description='A utility bundle for PyQt5.',
-        requires=['PyQt5']
+    name='QtUtilities',
+    version='0.1.0a',
+    packages=[
+        'QtUtilities',
+        'QtUtilities.requests',
+        'QtUtilities.widgets',
+        'QtUtilities.themes',
+        'QtUtilities.settings'
+    ],
+    url='https://www.github.com/SirRandoo/QtUtilities',
+    license='LGPLv3+',
+    author='SirRandoo',
+    author_email='',
+    description='A utility bundle for PyQt5.',
+    requires=['PyQt5']
 )
