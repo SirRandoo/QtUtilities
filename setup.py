@@ -27,7 +27,7 @@ from distutils.core import setup
 
 setup(
     name='QtUtilities',
-    version='0.1.0a',
+    version='0.7.0a',
     packages=[
         'QtUtilities',
         'QtUtilities.requests',

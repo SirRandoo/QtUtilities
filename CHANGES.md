@@ -1,4 +1,19 @@
-# QtUtilities v0.5.0
+# QtUtilities v0.7.0a
+
+* Switched theme classes into methods.
+
+
+# QtUtilities v0.6.0a
+
+* Recoded settings to be more simplistic.
+* Added simple classes to change a widget's palette.
+* Slightly recoded requests.factory & requests.response.
+* Reformatted code base to be PEP8 compliant.
+* Resolved licensing conflict.
+* Fixed the settings dialog improperly handling settings with descendants.
+* Added missing packages to the setup method.
+
+# QtUtilities v0.5.0a
 
 * Added CHANGES.md.
 * Renamed references to `randomshovel` to `sirrandoo`.
