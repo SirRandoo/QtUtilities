@@ -37,9 +37,9 @@ class ProgressWidget(QtWidgets.QWidget):
         self.label = QtWidgets.QLabel(parent=self)
         self.bar = QtWidgets.QProgressBar(parent=self)
         self._layout = QtWidgets.QVBoxLayout(self)
-        
-        self._layout.addWidget(self.label, None, QtCore.Qt.AlignCenter)
-        self._layout.addWidget(self.bar, None, QtCore.Qt.AlignCenter)
+
+        self._layout.addWidget(self.label, 0, QtCore.Qt.AlignCenter)
+        self._layout.addWidget(self.bar, 0, QtCore.Qt.AlignCenter)
         
         self.set_display_text = self.label.setText
         self.set_maximum = self.bar.setMaximum
