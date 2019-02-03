@@ -23,7 +23,6 @@
 # GNU Lesser General Public License along
 # with Decision Descent.  If not,
 # see <https://www.gnu.org/licenses/>.
-import functools
 import typing
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -33,17 +32,6 @@ from .setting import Setting
 from ..utils import should_create_widget
 
 __all__ = {"Display"}
-
-
-def filter_print(*args, **kwargs):
-    desired = kwargs.pop('__setting', '')
-    specified = kwargs.pop('setting', '')
-    
-    if specified.startswith(desired):
-        print(*args, **kwargs)
-
-
-p = functools.partial(filter_print, __setting='behavior/services')
 
 
 # noinspection PyArgumentList,PyProtectedMember
@@ -118,8 +106,6 @@ class Display(QtWidgets.QDialog):
     
     def _check_display(self, setting: Setting):
         """Creates a display for the settings object."""
-        pr = functools.partial(p, setting=setting.full_path)
-        
         if should_create_widget(setting._display):
             # Display creation
             parent: Setting = setting.parent()
