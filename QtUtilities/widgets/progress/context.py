@@ -84,21 +84,58 @@ class Context(QtWidgets.QDialog):
         self.adjustSize()
     
     # Utility Methods #
-    def task(self, func: typing.Callable):
-        """A wrapped threaded method for incrementing dialog's progress bar."""
+    def threaded_task(self, label: str, func: callable, *args, **kwargs):
+        """Executes a callable in a thread, while updating the dialog.
         
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            self.set_text(kwargs.pop("label", "Loading..."))
-            
-            thread = QtCore.QThread()
-            thread.run = functools.partial(func, *args, **kwargs)
-            
-            thread.start()
-            signals.wait_for_signal(thread.finished)
-            self.increment()
+        :param label: The text to display when this task is executing
+        :param func: The callable to execute"""
+        self.set_text(label)
+    
+        thread = QtCore.QThread()
+        thread.run = functools.partial(func, *args, **kwargs)
+    
+        thread.start()
+        signals.wait_for_signal(thread.finished)
+    
+        self.increment()
+
+    def task(self, label: str, func: callable, *args, **kwargs):
+        """Executes a callable while updating the dialog.
         
-        return wrapper
+        :param label: The text to display when this task is executing
+        :param func: The callable to execute"""
+        self.set_text(label)
+        func(*args, **kwargs)
+        self.increment()
+
+    def wait_for_task(self, label: str, signal: typing.Union[QtCore.pyqtSignal, QtCore.pyqtBoundSignal], *,
+                      timeout: int = None, before: callable = None, threaded: bool = None):
+        """Waits for a signal to be emitted before normal execution will proceed.
+        
+        :param label: The text to display when this task is executing
+        :param signal: The signal to wait for
+        :param timeout: The amount of seconds to wait before forcibly ending
+        :param before: The callable to execute before waiting
+        :param threaded: Whether or not the callable will be executed in a thread"""
+        loop = QtCore.QEventLoop()
+        self.set_text(label)
+    
+        signal.connect(loop.quit)
+    
+        if before is not None:
+            if threaded:
+                thread = QtCore.QThread()
+                thread.run = before
+            
+                QtCore.QTimer.singleShot(1, thread.start)
+        
+            else:
+                QtCore.QTimer.singleShot(1, before)
+    
+        if timeout:
+            QtCore.QTimer.singleShot(timeout * 1000, loop.quit)
+    
+        loop.exec()
     
     @staticmethod
     def wait_for(signal, *, timeout: int = None, initiator: callable = None):
@@ -136,5 +173,7 @@ class Context(QtWidgets.QDialog):
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.done(0)
+        
         if not sip.isdeleted(self):
             self.deleteLater()
