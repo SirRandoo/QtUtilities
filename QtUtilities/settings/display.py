@@ -83,7 +83,11 @@ class Display(QtWidgets.QDialog):
     # Display Methods #
     def display_checkup(self):
         """Checks up on the display to see if any objects need to be recreated."""
-        layout = QtWidgets.QHBoxLayout(self)
+        if self.layout() is not None:
+            layout = self.layout()
+
+        else:
+            layout = QtWidgets.QHBoxLayout(self)
         
         if should_create_widget(self.settings_tree):
             self.settings_tree = QtWidgets.QTreeWidget()
