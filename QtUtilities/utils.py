@@ -138,7 +138,7 @@ def populate_table(table: QtWidgets.QTableWidget, data: dict):
             
             if len(value) > _row_count:
                 table.setRowCount(len(value))
-                _row_count = value
+                _row_count = len(value)
             
             for item in value:
                 table.setItem(_current_row, _current_column, QtWidgets.QTableWidgetItem(str(item)))
