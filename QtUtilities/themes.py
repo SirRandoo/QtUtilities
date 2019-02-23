@@ -23,10 +23,9 @@
 # GNU Lesser General Public License along
 # with QtUtilities.  If not,
 # see <https://www.gnu.org/licenses/>.
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-
-__all__ = ['high_contrast']
+__all__ = ['dark', 'high_contrast']
 
 
 def dark(app: QtWidgets.QWidget):
