@@ -75,6 +75,38 @@ def qcombobox(obj: Setting) -> QtWidgets.QComboBox:
     return combobox
 
 
+def qfontbox(obj: Setting) -> QtWidgets.QFontComboBox:
+    """Converts a settings object into a visible QFontComboBox."""
+    # Declarations
+    parent = obj.parent()
+    parent = getattr(parent, '_container', None)
+    
+    combobox = QtWidgets.QFontComboBox(parent=parent)
+    
+    if combobox.isWindow():
+        combobox.hide()
+    
+    # Adjustments
+    combobox.setMaxVisibleItems(obj._data.get('max_visible', 200))
+    combobox.setMinimumContentsLength(obj._data.get('min_content_length', 1))
+    
+    # Population
+    combobox.setCurrentFont(QtGui.QFont(obj.value))
+    
+    # Validation
+    if obj.converter != 'qfontbox':
+        obj._data['converter'] = 'qfontbox'
+    
+    # Signals
+    def store_font(font: QtGui.QFont):
+        obj.value = font.rawName()
+    
+    combobox.currentFontChanged.connect(store_font)
+    
+    # Return
+    return combobox
+
+
 # noinspection PyArgumentList
 def qfile(obj: Setting) -> QtWidgets.QWidget:
     """Converts a settings object into a visible QWidget."""
