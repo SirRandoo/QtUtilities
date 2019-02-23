@@ -238,6 +238,16 @@ class Setting(QtCore.QObject):
     @converter.deleter
     def converter(self):
         del self._data['converter']
+
+    @property
+    def data(self) -> dict:
+        """The raw data for this setting."""
+        return self._data
+
+    @property
+    def display(self) -> typing.Optional[QtWidgets.QWidget]:
+        """The QWidget for this setting."""
+        return self._display
     
     # Data Methods #
     def _generate_data(self) -> dict:
