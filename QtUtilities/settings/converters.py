@@ -46,12 +46,12 @@ def qcombobox(obj: Setting) -> QtWidgets.QComboBox:
         combobox.hide()
     
     # Adjustments
-    combobox.setMaxVisibleItems(obj._data.get('max_visible', 200))
-    combobox.setMinimumContentsLength(obj._data.get('min_content_length', 1))
+    combobox.setMaxVisibleItems(obj.data.get('max_visible', 200))
+    combobox.setMinimumContentsLength(obj.data.get('min_content_length', 1))
     
     # Population
-    if 'choices' in obj._data:
-        for choice in obj._data.get('choices', []):
+    if 'choices' in obj.data:
+        for choice in obj.data.get('choices', []):
             if isinstance(choice, dict):
                 if 'icon' in choice:
                     combobox.addItem(QtGui.QIcon(choice['icon']), choice.get('text', ''))
@@ -66,7 +66,7 @@ def qcombobox(obj: Setting) -> QtWidgets.QComboBox:
     
     # Validation
     if obj.converter != 'qcombobox':
-        obj._data['converter'] = 'qcombobox'
+        obj.data['converter'] = 'qcombobox'
     
     # Signals
     combobox.currentIndexChanged.connect(functools.partial(setattr, obj, 'value'))
@@ -87,15 +87,15 @@ def qfontbox(obj: Setting) -> QtWidgets.QFontComboBox:
         combobox.hide()
     
     # Adjustments
-    combobox.setMaxVisibleItems(obj._data.get('max_visible', 200))
-    combobox.setMinimumContentsLength(obj._data.get('min_content_length', 1))
+    combobox.setMaxVisibleItems(obj.data.get('max_visible', 200))
+    combobox.setMinimumContentsLength(obj.data.get('min_content_length', 1))
     
     # Population
     combobox.setCurrentFont(QtGui.QFont(obj.value))
     
     # Validation
     if obj.converter != 'qfontbox':
-        obj._data['converter'] = 'qfontbox'
+        obj.data['converter'] = 'qfontbox'
     
     # Signals
     def store_font(font: QtGui.QFont):
@@ -155,7 +155,7 @@ def qfile(obj: Setting) -> QtWidgets.QWidget:
     
     # Validation
     if obj.converter != 'qfile':
-        obj._data['converter'] = 'qfile'
+        obj.data['converter'] = 'qfile'
     
     # Signals
     button.clicked.connect(show_dialog)
@@ -183,6 +183,7 @@ def qdir(obj: Setting) -> QtWidgets.QWidget:
                                                           directory=QtCore.QUrl(os.getcwd()))
         
         if url.isValid():
+            # noinspection PyTypeChecker
             path: str = url.toDisplayString(url.RemoveScheme | url.NormalizePathSegments).lstrip("/")
             
             line.setText(path)
@@ -202,7 +203,7 @@ def qdir(obj: Setting) -> QtWidgets.QWidget:
     
     # Validation
     if obj.converter != 'qdir':
-        obj._data['converter'] = 'qdir'
+        obj.data['converter'] = 'qdir'
     
     # Signals
     button.clicked.connect(show_dialog)
@@ -232,7 +233,7 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
         if index > 0:
             item = list_widget.takeItem(index)
             list_widget.insertItem(index - 1, item)
-            list_widget.setCurrentIndex(index - 1)
+            list_widget.setCurrentRow(index - 1)
     
     def move_down():
         index = list_widget.currentRow()
@@ -250,7 +251,7 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
     s_layout.setContentsMargins(0, 0, 0, 0)
     
     list_widget.setEditTriggers(list_widget.DoubleClicked)
-    list_widget.setViewMode(obj._data.get('view_mode', list_widget.ListMode))
+    list_widget.setViewMode(obj.data.get('view_mode', list_widget.ListMode))
     
     # Population
     if not isinstance(obj.value, list):
@@ -266,7 +267,7 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
     
     # Validation
     if obj.converter != 'qlist':
-        obj._data['converter'] = 'qlist'
+        obj.data['converter'] = 'qlist'
     
     # Signals
     up.clicked.connect(move_up)
@@ -311,7 +312,7 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
         if index > 0:
             item = list_widget.takeItem(index)
             list_widget.insertItem(index - 1, item)
-            list_widget.setCurrentIndex(index - 1)
+            list_widget.setCurrentRow(index - 1)
     
     def move_down():
         index = list_widget.currentRow()
@@ -325,7 +326,7 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
         data = []
         
         for index in range(list_widget.count()):
-            item: QtWidgets.QListWidgetItem = list_widget.itemAt(index)
+            item: QtWidgets.QListWidgetItem = list_widget.item(index)
             
             if item:
                 data.append(item.text())
@@ -343,7 +344,7 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
     s_layout.setContentsMargins(0, 0, 0, 0)
     
     list_widget.setEditTriggers(list_widget.DoubleClicked)
-    list_widget.setViewMode(obj._data.get('view_mode', list_widget.ListMode))
+    list_widget.setViewMode(obj.data.get('view_mode', list_widget.ListMode))
     
     # Population
     if not isinstance(obj.value, list):
@@ -362,7 +363,7 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
     
     # Validation
     if obj.converter != 'qaddablelist':
-        obj._data['converter'] = 'qaddablelist'
+        obj.data['converter'] = 'qaddablelist'
     
     # Signals
     add.clicked.connect(add_item)
@@ -393,15 +394,15 @@ def char(obj: Setting) -> QtWidgets.QLineEdit:
     # Population
     if obj.value is not None:
         line.setText(str(obj.value))
-    
-    line.setMaxLength(obj._data.get('max_length', 260))
-    line.setClearButtonEnabled(obj._data.get('clear_button', False))
-    line.setEchoMode(obj._data.get('echo_mode', line.NoEcho))
-    line.setPlaceholderText(obj._data.get('placeholder', ''))
+
+    line.setMaxLength(obj.data.get('max_length', 260))
+    line.setClearButtonEnabled(obj.data.get('clear_button', False))
+    line.setEchoMode(obj.data.get('echo_mode', line.NoEcho))
+    line.setPlaceholderText(obj.data.get('placeholder', ''))
     
     # Validation
     if obj.converter != 'char':
-        obj._data['converter'] = 'char'
+        obj.data['converter'] = 'char'
     
     # Signals
     line.textChanged.connect(functools.partial(setattr, obj, 'value'))
@@ -424,7 +425,7 @@ def text(obj: Setting) -> QtWidgets.QTextEdit:
     
     # Validation
     if obj.converter != 'text':
-        obj._data['converter'] = 'text'
+        obj.data['converter'] = 'text'
     
     # Signals
     edit.textChanged.connect(functools.partial(setattr, obj, 'value', edit.toPlainText()))
@@ -449,13 +450,13 @@ def number(obj: Setting) -> QtWidgets.QSpinBox:
         spin.setValue(int(obj.value))
     
     # Adjustments
-    spin.setRange(obj._data.get('minimum', -1000000), obj._data.get('maximum', 1000000))
-    spin.setButtonSymbols(obj._data.get('buttons', spin.UpDownArrows))
-    spin.setGroupSeparatorShown(obj._data.get('separator', False))
+    spin.setRange(obj.data.get('minimum', -1000000), obj.data.get('maximum', 1000000))
+    spin.setButtonSymbols(obj.data.get('buttons', spin.UpDownArrows))
+    spin.setGroupSeparatorShown(obj.data.get('separator', False))
     
     # Validation
     if obj.converter != 'number':
-        obj._data['converter'] = 'number'
+        obj.data['converter'] = 'number'
     
     # Signals
     spin.valueChanged.connect(functools.partial(setattr, obj, 'value'))
@@ -477,13 +478,13 @@ def decimal(obj: Setting) -> QtWidgets.QDoubleSpinBox:
         spin.setValue(float(obj.value))
     
     # Adjustments
-    spin.setRange(obj._data.get('minimum', -1000000), obj._data.get('maximum', 1000000))
-    spin.setGroupSeparatorShown(obj._data.get('separator', False))
-    spin.setButtonSymbols(obj._data.get('buttons', spin.UpDownArrows))
+    spin.setRange(obj.data.get('minimum', -1000000), obj.data.get('maximum', 1000000))
+    spin.setGroupSeparatorShown(obj.data.get('separator', False))
+    spin.setButtonSymbols(obj.data.get('buttons', spin.UpDownArrows))
     
     # Validation
     if obj.converter != 'decimal':
-        obj._data['converter'] = 'decimal'
+        obj.data['converter'] = 'decimal'
     
     # Signals
     spin.valueChanged.connect(functools.partial(setattr, obj, 'value'))
@@ -511,7 +512,7 @@ def boolean(obj: Setting) -> QtWidgets.QCheckBox:
             obj.value = False
     
     # Adjustments
-    check.setTristate(obj._data.get('tristate', False))
+    check.setTristate(obj.data.get('tristate', False))
     
     # Population
     if obj.value is not None:
@@ -519,7 +520,7 @@ def boolean(obj: Setting) -> QtWidgets.QCheckBox:
     
     # Validation
     if obj.converter != 'boolean':
-        obj._data['converter'] = 'boolean'
+        obj.data['converter'] = 'boolean'
     
     # Signals
     check.stateChanged.connect(change_value)
