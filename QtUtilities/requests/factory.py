@@ -23,101 +23,118 @@
 # GNU Lesser General Public License along
 # with QtUtilities.  If not,
 # see <https://www.gnu.org/licenses/>.
+import functools
+import typing
+
 from PyQt5 import QtCore, QtNetwork
 
-from . import errors
 from .response import Response
 
-__all__ = {"Factory"}
+__all__ = ['Factory']
 
 
 class Factory(QtCore.QObject):
-    def __init__(self, parent=None, manager: QtNetwork.QNetworkAccessManager = None):
-        # Super Call  #
+    """The core of the requests package.
+    
+    This class is responsible for issuing requests through the application's
+    QNetworkAccessManager, and returning the response in a synchronous way."""
+    
+    def __init__(self, manager: QtNetwork.QNetworkAccessManager = None, *, parent: QtCore.QObject = None):
+        # Super call
         super(Factory, self).__init__(parent=parent)
         
-        #  Internal Attributes  #
-        self._manager = manager if manager is not None else QtNetwork.QNetworkAccessManager(parent=self)
+        # Aliases
+        self.get = functools.partial(self.request, 'GET')
+        self.put = functools.partial(self.request, 'PUT')
+        self.post = functools.partial(self.request, 'POST')
+        self.head = functools.partial(self.request, 'HEAD')
+        self.patch = functools.partial(self.request, 'PATCH')
+        self.delete = functools.partial(self.request, 'DELETE')
+        self.options = functools.partial(self.request, 'OPTIONS')
+        
+        # Private attributes
+        self._manager = manager
+        
+        # Attribute validation
+        if self._manager is None:
+            self._manager = QtNetwork.QNetworkAccessManager(parent=self)
     
-    def request(self, **kwargs) -> Response:
-        """Performs a `requests` like request."""
+    # Core request method
+    def request(self, op: str, url: typing.Union[QtCore.QUrl, str], *,
+                params: typing.Dict[str, str] = None,
+                headers: typing.Dict[typing.AnyStr, typing.AnyStr] = None,
+                data: typing.Union[str, bytes, QtCore.QBuffer] = None,
+                request: QtNetwork.QNetworkRequest = None):
+        """Issues a new request.
         
-        #  Validation  #
-        if "url" not in kwargs:
-            raise errors.UrlMissingError
+        This method was designed to mimic standard synchronous libraries on PyPi,
+        but on the Qt5 event loop.
         
-        if "operation" not in kwargs:
-            raise errors.OperationMissingError
+        If request is passed, `url`, `params`, and `headers` will be ignored."""
+        # Request object validation
+        if request is not None:
+            return self._request(op.upper(), request, data=data)
         
-        # Stitching  #
-        _url = QtCore.QUrl(kwargs.pop("url"))
-        _request = QtNetwork.QNetworkRequest(_url)
-        _data = QtCore.QBuffer()
+        else:
+            request = QtNetwork.QNetworkRequest()
         
-        if "params" in kwargs:
-            query = QtCore.QUrlQuery()
+        # Url conversion
+        if isinstance(url, str):
+            url = QtCore.QUrl(url)
+        
+        # Url assignment
+        request.setUrl(url)
+        
+        # Parameter stitching
+        if params is not None:
+            # Declaration and assignment
+            q = QtCore.QUrlQuery()
+            url.setQuery(q)
             
-            for k, v in kwargs.pop("params", {}).items():
-                query.addQueryItem(k, v)
+            # Populate the QUrlQuery
+            for k, v in params.items():
+                q.addQueryItem(k, v)
+        
+        # Header stitching
+        if headers is not None:
+            for k, v in headers.items():
+                # Declarations
+                key, value = None, None
+                
+                # Item validation
+                if not isinstance(k, bytes):
+                    key = k.encode(encoding='UTF-8')
+                
+                if not isinstance(v, bytes):
+                    value = v.encode(encoding='UTF-8')
+                
+                # Populate request header
+                request.setRawHeader(key, value)
+        
+        if data is not None:
+            # Declarations
+            buffer: QtCore.QBuffer = None
             
-            _url.setQuery(query)
+            # Buffer validation
+            if isinstance(data, QtCore.QBuffer):
+                buffer = data
+            
+            else:
+                buffer = QtCore.QBuffer()
+            
+            # Data validation
+            if isinstance(data, str):
+                buffer.setData(data.encode(encoding='UTF-8'))
+            
+            elif isinstance(data, bytes):
+                buffer.setData(data)
         
-        if "data" in kwargs:
-            _data.setData(kwargs.pop("data").encode())
+        else:
+            buffer = None
         
-        if "headers" in kwargs:
-            for k, v in kwargs.pop("headers").items():
-                _request.setRawHeader(k.encode(), v.encode())
-        
-        _operation = kwargs.pop("operation").upper()  # type: str
-        
-        _reply = self._manager.sendCustomRequest(_request, _operation.encode(), _data if _data.size() > 0 else None)
-        _response = Response()
-        _response.follow_reply(_reply)
-        return _response
+        return self._request(op.upper(), request, data=buffer)
     
-    def get(self, url: str, params: dict = None, **kwargs) -> Response:
-        """Performs a get operation."""
-        if params is None:
-            params = dict()
-        
-        if "operation" in kwargs:
-            kwargs.pop("operation")
-        
-        return self.request(operation="GET", url=url, params=params, **kwargs)
-    
-    def put(self, url: str, data: str = None, **kwargs) -> Response:
-        if "operation" in kwargs:
-            kwargs.pop("operation")
-        
-        return self.request(operation="PUT", url=url, data=data, **kwargs)
-    
-    def post(self, url: str, data: str = None, **kwargs) -> Response:
-        if "operation" in kwargs:
-            kwargs.pop("operation")
-        
-        return self.request(url=url, operation="POST", data=data, **kwargs)
-    
-    def head(self, url: str, **kwargs) -> Response:
-        if "operation" in kwargs:
-            kwargs.pop("operation")
-        
-        return self.request(url=url, operation="HEAD")
-    
-    def patch(self, url: str, data: str = None, **kwargs) -> Response:
-        if "operation" in kwargs:
-            kwargs.pop("operation")
-        
-        return self.request(url=url, operation="PATCH", data=data, **kwargs)
-    
-    def delete(self, url: str, **kwargs) -> Response:
-        if "operation" in kwargs:
-            kwargs.pop("operation")
-        
-        return self.request(operation="DELETE", url=url, **kwargs)
-    
-    def options(self, url: str, **kwargs) -> Response:
-        if "operation" in kwargs:
-            kwargs.pop("operation")
-        
-        return self.request(operation="OPTIONS", url=url, **kwargs)
+    def _request(self, op: str, request: QtNetwork.QNetworkRequest, *, data: QtCore.QBuffer = None):
+        """The real implementation of the request method."""
+        # Send the request & return the Response object
+        return Response.from_reply(self._manager.sendCustomRequest(request, op.encode(encoding='UTF-8'), data))

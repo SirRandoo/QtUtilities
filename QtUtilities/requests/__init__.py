@@ -23,8 +23,7 @@
 # GNU Lesser General Public License along
 # with QtUtilities.  If not,
 # see <https://www.gnu.org/licenses/>.
-from . import errors
 from .factory import Factory
 from .response import Response
 
-__all__ = {"errors", "Factory", "Response"}
+__all__ = ['Factory', 'Response']

@@ -23,6 +23,7 @@
 # GNU Lesser General Public License along
 # with QtUtilities.  If not,
 # see <https://www.gnu.org/licenses/>.
+import dataclasses
 import functools
 import io
 import json
@@ -30,164 +31,140 @@ import typing
 
 from PyQt5 import QtCore, QtNetwork
 
-__all__ = {"Response"}
+from .. import signals
+
+__all__ = ['Response']
 
 
+@dataclasses.dataclass(frozen=True)
 class Response:
-    """Represents a response dataclass for
-    requests made with this package.  The
-    reasoning behind this is that QNetworkReply's
-    cannot be passed around without experiencing
-    a fatal crash."""
+    """The response from a factory request.  This alone does nothing without
+    a QNetworkReply to populate itself."""
+    # Instance attributes
+    urls: typing.List[QtCore.QUrl] = dataclasses.field(init=False, default_factory=list)
+    params: typing.Dict[str, str] = dataclasses.field(init=False, default_factory=dict)
+    host: str = dataclasses.field(init=False, default_factory=str)
+    scheme: str = dataclasses.field(init=False, default_factory=str)
+    domain: str = dataclasses.field(init=False, default_factory=str)
+    port: int = dataclasses.field(init=False, default_factory=int)
+    cookies: typing.Dict[str, typing.Any] = dataclasses.field(init=False, default_factory=dict)
+    all_headers: typing.List[typing.Dict[str, str]] = dataclasses.field(init=False, default_factory=list)
+    code: int = dataclasses.field(init=False, default=QtNetwork.QNetworkReply.NoError)
+    error_string: str = dataclasses.field(init=False, default_factory=str)
+    raw_content: io.BytesIO = dataclasses.field(init=False, default_factory=io.BytesIO)
     
-    def __init__(self):
-        #  Internal attributes  #
-        self._urls: list = []
-        self._params: dict = {}
-        self._host: str = None
-        self._scheme: str = None
-        self._domain: str = None
-        self._port: int = None
-        self._cookies: list = []
-        self._content = io.BytesIO()
-        self._headers: list = []
-        self._error_code: int = QtNetwork.QNetworkReply.NoError
-        self._error_string: str = None
-    
-    #  Data Methods  #
-    def was_redirected(self) -> bool:
-        """Returns whether or not the request
-        was redirected."""
-        return len(self._urls) > 1
-    
-    def is_ok(self) -> bool:
-        """Returns whether or not the request's
-        status code is OK."""
-        return self._error_code == QtNetwork.QNetworkReply.NoError
-    
-    def json(self, encoder=None) -> dict:
-        """Attempts to encode the content into a
-        JSON object.  For error handling, refer
-        to the passed encoder or `json.loads`."""
-        if encoder is not None:
-            assert callable(encoder), "Decoder must be a callable!"
-        
-        else:
-            encoder = json.loads
-        
-        return encoder(self.raw())
-    
-    def raw(self) -> bytes:
-        """Returns the raw data received from
-        the request."""
-        self._content.seek(0)
-        return self._content.read()
-    
-    def content(self) -> str:
-        """Returns the raw data received from
-        the request as a string"""
-        return self.raw().decode()
-    
-    # Error Methods #
-    def error_code(self) -> int:
-        """Returns the error code, if any."""
-        return self._error_code
-    
-    def error_string(self) -> typing.Optional[str]:
-        """Returns the error string, if any."""
-        return self._error_string
-    
-    # Properties  #
-    @property
-    def headers(self) -> dict:
-        """Returns the latest headers."""
-        return self._headers[-1]
-    
-    @property
-    def cookies(self) -> dict:
-        """Returns the latest cookies."""
-        if self._cookies:
-            return self._cookies[-1]
-        
-        else:
-            return dict()
-    
+    # Properties
     @property
     def url(self) -> QtCore.QUrl:
-        """Returns the latest url."""
-        return self._urls[-1]
-    
-    @property
-    def scheme(self) -> str:
-        """Returns the latest scheme."""
-        return self.url.scheme()
-    
-    @property
-    def domain(self):
-        """Returns the latest domain."""
-        return self.url.topLevelDomain()
-    
-    @property
-    def host(self):
-        """Returns the latest host."""
-        return self.url.host()
-    
-    #  Internal Handlers  #
-    def follow_reply(self, reply: QtNetwork.QNetworkReply):
-        # Follows a reply until it's finished.  It
-        # documents changes in the reply while it's
-        #  being completed.  Changes include header
-        #  changes and redirects.
+        """The last QUrl the request was redirected through, assuming redirects
+        are allowed.  If no urls were cached, an empty QUrl will be returned."""
+        try:
+            return self.urls[-1]
         
-        loop = QtCore.QEventLoop()
-        reply.metaDataChanged.connect(
-            lambda: self._headers.append(
-                {hKey.data().decode(): hValue.data().decode() for hKey, hValue in reply.rawHeaderPairs()}))
-        reply.redirected.connect(lambda x: self._urls.append(x))
-        reply.finished.connect(loop.quit)
-        reply.error.connect(functools.partial(setattr, self, '_error_code'))
-        reply.error.connect(lambda: setattr(self, '_error_string', reply.errorString()))
-        loop.exec()
+        except IndexError:
+            return QtCore.QUrl()
+    
+    @property
+    def headers(self) -> typing.Dict[str, str]:
+        """The last headers the request obtained from the host.  If no headers
+        were received, an empty dict will be returned."""
+        try:
+            return self.all_headers[-1]
         
-        self._strip_reply(reply)
+        except IndexError:
+            return {}
+        
+    @property
+    def redirected(self) -> bool:
+        """Whether or not the request was redirected."""
+        return len(self.urls) > 1
+    
+    @property
+    def content(self):
+        """The raw content received from the request transformed into a string."""
+        self.raw_content.seek(0)
+        
+        return self.raw_content.read().decode()
+    
+    # Internal methods
+    # noinspection PyUnresolvedReferences
+    @classmethod
+    def from_reply(cls, reply: QtNetwork.QNetworkReply) -> 'Response':
+        """Slowly populates a new Response object with data from the request."""
+        r = cls()
+        
+        # Signal mapping
+        reply.metaDataChanged.connect(functools.partial(r._insert_headers, reply.rawHeaderPairs()))
+        reply.redirected.connect(r._insert_url)
+        reply.error.connect(r._update_code)
+        reply.error.connect(functools.partial(r._update_error_string, reply.errorString()))
+        
+        # Wait until the request is finished before continuing
+        signals.wait_for_signal(reply.finished)
+        
+        # Strip the remaining data from the reply, then mark it for deletion
+        r._from_reply(reply)
+        
         reply.close()
-        loop.deleteLater()
         reply.deleteLater()
+        
+        # Return the object
+        return r
     
-    def _strip_reply(self, reply: QtNetwork.QNetworkReply):
-        # Strips the completed reply of useful information.
-        # Headers
-        headers = {hKey.data().decode(): hValue.data().decode() for hKey, hValue in reply.rawHeaderPairs()}
-        
-        if self.headers != headers:
-            self._headers.append(headers)
-        
-        # Content
+    def _from_reply(self, reply: QtNetwork.QNetworkReply):
+        """Updates the Response object with the remaining data from the reply."""
+        # Read the reply's body
         if reply.isReadable():
-            self._content = io.BytesIO(reply.readAll())
+            self.raw_content.seek(0)
+            self.raw_content.write(reply.readAll())
         
-        # Cookies
+        # Store the cookies
         manager: QtNetwork.QNetworkAccessManager = reply.manager()
         jar: QtNetwork.QNetworkCookieJar = manager.cookieJar()
-        cookies = {cookie.name().data().decode(): cookie.value() for cookie in jar.allCookies()}
+        object.__setattr__(self, 'cookies', {c.name().data().decode(): c.value() for c in jar.allCookies()})
+    
+    def _insert_headers(self, headers: typing.List[typing.Tuple[QtCore.QByteArray, QtCore.QByteArray]]):
+        """Inserts the passed headers into the classes' header list."""
+        # Declarations
+        h = self.all_headers.copy()
         
-        if cookies != self.cookies:
-            self._cookies.append(cookies)
+        # Append passed headers to header list
+        h.append({k.data().decode(): v.data().decode() for k, v in headers})
         
-        # Request
-        request: QtNetwork.QNetworkRequest = reply.request()
-        headers = {hKey.data().decode(): request.rawHeader(hKey).data().decode() for hKey in request.rawHeaderList()}
+        # Forcibly update the header list
+        object.__setattr__(self, 'headers', h)
+    
+    def _insert_url(self, url: QtCore.QUrl):
+        """Inserts the passed url into the classes' url list."""
+        # Declarations
+        u = self.urls.copy()
         
-        if self._urls:
-            if self._urls[0] != request.url():
-                self._urls.insert(0, request.url())
+        # Append passed url to url list
+        u.append(url)
         
-        else:
-            self._urls.append(request.url())
+        # Forcible update the url list
+        object.__setattr__(self, 'urls', u)
+    
+    def _update_code(self, code: int):
+        """Updates the classes' code with the one passed."""
+        object.__setattr__(self, 'code', code)
+    
+    def _update_error_string(self, string: str):
+        """Updates the classes' error string with the one passed."""
+        object.__setattr__(self, 'error_string', string)
+    
+    # Utility methods
+    def is_okay(self) -> bool:
+        """Whether or not the request was successful."""
+        return self.code == QtNetwork.QNetworkReply.NoError
+    
+    def json(self, encoder: typing.Callable[[str], dict] = None) -> dict:
+        """Converts the reply's body into a JSON object."""
+        if encoder is None:
+            encoder = json.loads
         
-        if self._headers:
-            if self._headers[0] != headers:
-                self._headers.insert(0, headers)
-        
-        else:
-            self._headers.append(headers)
+        return encoder(self.content)
+    
+    # Magic methods
+    def __repr__(self):
+        return f'<{self.__class__.__name__} url="{self.url.toDisplayString()}" code={self.code}>'
