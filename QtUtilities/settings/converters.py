@@ -116,7 +116,7 @@ def qfile(obj: Setting) -> QtWidgets.QWidget:
     
     widget = QtWidgets.QWidget(parent=parent)
     line = QtWidgets.QLineEdit(parent=widget)
-    button = QtWidgets.QPushButton('Open...', parent=widget)
+    button = QtWidgets.QToolButton(parent=widget)
     layout = QtWidgets.QHBoxLayout(widget)
     
     if widget.isWindow():
@@ -145,6 +145,7 @@ def qfile(obj: Setting) -> QtWidgets.QWidget:
     
     # Adjustments
     layout.setContentsMargins(0, 0, 0, 0)
+    button.setText('📂')
     
     # Population
     layout.addWidget(line)
@@ -173,7 +174,7 @@ def qdir(obj: Setting) -> QtWidgets.QWidget:
     
     widget = QtWidgets.QWidget(parent=parent)
     line = QtWidgets.QLineEdit(parent=widget)
-    button = QtWidgets.QPushButton('Open...', parent=widget)
+    button = QtWidgets.QToolButton(parent=widget)
     layout = QtWidgets.QHBoxLayout(widget)
     
     def show_dialog():
@@ -193,6 +194,7 @@ def qdir(obj: Setting) -> QtWidgets.QWidget:
     
     # Adjustments
     layout.setContentsMargins(0, 0, 0, 0)
+    button.setText('📂')
     
     # Population
     layout.addWidget(line)
@@ -222,8 +224,8 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
     widget = QtWidgets.QWidget(parent=parent)
     surrogate = QtWidgets.QWidget(parent=widget)
     list_widget = QtWidgets.QListWidget(parent=widget)
-    up = QtWidgets.QPushButton('▲', parent=surrogate)
-    down = QtWidgets.QPushButton('▼', parent=surrogate)
+    up = QtWidgets.QToolButton(parent=surrogate)
+    down = QtWidgets.QToolButton(parent=surrogate)
     layout = QtWidgets.QHBoxLayout(widget)
     s_layout = QtWidgets.QVBoxLayout(surrogate)
     
@@ -244,8 +246,8 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
             list_widget.setCurrentRow(index + 1)
     
     # Adjustments
-    up.setMaximumSize(16, 16)
-    down.setMaximumSize(16, 16)
+    up.setText('▲')
+    down.setText('▼')
     
     layout.setContentsMargins(0, 0, 0, 0)
     s_layout.setContentsMargins(0, 0, 0, 0)
@@ -288,10 +290,10 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
     widget = QtWidgets.QWidget(parent=parent)
     surrogate = QtWidgets.QWidget(parent=widget)
     list_widget = QtWidgets.QListWidget(parent=widget)
-    add = QtWidgets.QPushButton('+', parent=surrogate)
-    remove = QtWidgets.QPushButton('-', parent=surrogate)
-    up = QtWidgets.QPushButton('▲', parent=surrogate)
-    down = QtWidgets.QPushButton('▼', parent=surrogate)
+    add = QtWidgets.QToolButton(parent=surrogate)
+    remove = QtWidgets.QToolButton(parent=surrogate)
+    up = QtWidgets.QToolButton(parent=surrogate)
+    down = QtWidgets.QToolButton(parent=surrogate)
     layout = QtWidgets.QHBoxLayout(widget)
     s_layout = QtWidgets.QVBoxLayout(surrogate)
     
@@ -334,11 +336,10 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
         obj.value = data
     
     # Adjustments
-    add.setMaximumSize(16, 16)
-    remove.setMaximumSize(16, 16)
-    
-    up.setMaximumSize(16, 16)
-    down.setMaximumSize(16, 16)
+    add.setText('+')
+    remove.setText('-')
+    up.setText('▲')
+    down.setText('▼')
     
     layout.setContentsMargins(0, 0, 0, 0)
     s_layout.setContentsMargins(0, 0, 0, 0)
