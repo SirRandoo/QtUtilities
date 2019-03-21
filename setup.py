@@ -25,14 +25,17 @@
 # see <https://www.gnu.org/licenses/>.
 from distutils.core import setup
 
+with open('requirements.txt') as INFILE:
+    requirements = INFILE.readlines()
+
+
 setup(
     name='QtUtilities',
-    version='0.7.0a',
+    version='1.0.0',
     packages=[
         'QtUtilities',
         'QtUtilities.requests',
         'QtUtilities.widgets',
-        'QtUtilities.themes',
         'QtUtilities.settings'
     ],
     url='https://www.github.com/SirRandoo/QtUtilities',
@@ -40,5 +43,5 @@ setup(
     author='SirRandoo',
     author_email='',
     description='A utility bundle for PyQt5.',
-    requires=['PyQt5']
+    requires=requirements
 )
