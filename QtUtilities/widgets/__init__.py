@@ -29,5 +29,6 @@ from .qgauge import QGauge
 from .qpopoutoverlay import QPopoutOverlay
 from .qredockable import QRedockable
 from .qslidebutton import QSlideButton
+from .qtable import QTable
 
-__all__ = ['QAnimatedSplash', 'QCircleProgressBar', 'QGauge', 'QPopoutOverlay', 'QRedockable', 'QSlideButton']
+__all__ = ['QAnimatedSplash', 'QCircleProgressBar', 'QGauge', 'QPopoutOverlay', 'QRedockable', 'QSlideButton', 'QTable']
