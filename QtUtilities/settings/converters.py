@@ -377,7 +377,7 @@ def char(obj: Setting) -> QtWidgets.QLineEdit:
 
     line.setMaxLength(obj.data.get('max_length', 260))
     line.setClearButtonEnabled(obj.data.get('clear_button', False))
-    line.setEchoMode(obj.data.get('echo_mode', line.NoEcho))
+    line.setEchoMode(obj.data.get('echo_mode', line.Normal))
     line.setPlaceholderText(obj.data.get('placeholder', ''))
 
     # Forcibly reassign the converter
