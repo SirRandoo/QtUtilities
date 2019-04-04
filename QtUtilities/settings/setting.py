@@ -162,7 +162,15 @@ class Setting(QtCore.QObject):
     def from_data(cls, data: dict) -> 'Setting':
         """Creates a new Setting object from raw data."""
         inst: Setting = cls(key=data['key'], value=data.get('value'))
-        inst.data = data.get('data')
+
+        inst.tooltip = data['tooltip']
+        inst.hidden = data['hidden']
+        inst.converter = data['converter']
+        inst.status_tip = data['status_tip']
+        inst.whats_this = data['whats_this']
+        inst.read_only = data['read_only']
+        inst.display_name = data['display_name']
+        inst.data = data['data']
         
         for child in data.get('descendants'):  # type: dict
             c = Setting.from_data(child)
@@ -176,7 +184,14 @@ class Setting(QtCore.QObject):
             'key': self.key,
             'value': self.value,
             'descendants': [d.to_data() for d in self.descendants()],
-            'data': self.data
+            'data': self.data,
+            'read_only': self.read_only,
+            'hidden': self.hidden,
+            'tooltip': self.tooltip,
+            'status_tip': self.status_tip,
+            'whats_this': self.whats_this,
+            'display_name': self.display_name,
+            'converter': self.converter
         }
 
     # Magic methods
