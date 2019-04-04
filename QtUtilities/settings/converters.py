@@ -37,11 +37,9 @@ __all__ = {'qcombobox', 'qaddablelist', 'qdir', 'qfile', 'qlist', 'char',
 def qcombobox(obj: Setting) -> QtWidgets.QComboBox:
     """Converts a settings object into a visible QComboBox."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    combobox = QtWidgets.QComboBox(parent=parent)
-    
+    combobox = QtWidgets.QComboBox()
+
+    # If the combobox is a top-level widget, hide it.
     if combobox.isWindow():
         combobox.hide()
     
@@ -63,13 +61,12 @@ def qcombobox(obj: Setting) -> QtWidgets.QComboBox:
                 combobox.addItem(choice)
         
         combobox.setCurrentIndex(obj.value)
-    
-    # Validation
-    if obj.converter != 'qcombobox':
-        obj.data['converter'] = 'qcombobox'
+
+    # Forcibly reasssign the converter
+    obj.converter = 'qcombobox'
     
     # Signals
-    combobox.currentIndexChanged.connect(functools.partial(setattr, obj, 'value'))
+    combobox.currentIndexChanged.connect(obj.set_value)
     
     # Return
     return combobox
@@ -78,11 +75,9 @@ def qcombobox(obj: Setting) -> QtWidgets.QComboBox:
 def qfontbox(obj: Setting) -> QtWidgets.QFontComboBox:
     """Converts a settings object into a visible QFontComboBox."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    combobox = QtWidgets.QFontComboBox(parent=parent)
-    
+    combobox = QtWidgets.QFontComboBox()
+
+    # If the combobox is a top-level window, hide it.
     if combobox.isWindow():
         combobox.hide()
     
@@ -92,14 +87,13 @@ def qfontbox(obj: Setting) -> QtWidgets.QFontComboBox:
     
     # Population
     combobox.setCurrentFont(QtGui.QFont(obj.value))
-    
-    # Validation
-    if obj.converter != 'qfontbox':
-        obj.data['converter'] = 'qfontbox'
+
+    # Forcibly reassign the converter
+    obj.converter = 'qfontbox'
     
     # Signals
     def store_font(font: QtGui.QFont):
-        obj.value = font.rawName()
+        obj.set_value(font.rawName())
     
     combobox.currentFontChanged.connect(store_font)
     
@@ -107,28 +101,18 @@ def qfontbox(obj: Setting) -> QtWidgets.QFontComboBox:
     return combobox
 
 
-# noinspection PyArgumentList
 def qfile(obj: Setting) -> QtWidgets.QWidget:
     """Converts a settings object into a visible QWidget."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    widget = QtWidgets.QWidget(parent=parent)
+    widget = QtWidgets.QWidget()
     line = QtWidgets.QLineEdit(parent=widget)
     button = QtWidgets.QToolButton(parent=widget)
     layout = QtWidgets.QHBoxLayout(widget)
-    
+
+    # If the widget is a top-level window, hide it.
     if widget.isWindow():
         widget.hide()
     
-    if line.isWindow():
-        widget.hide()
-    
-    if button.isWindow():
-        button.hide()
-    
-    # noinspection PyArgumentList
     def show_dialog():
         dialog = QtWidgets.QFileDialog()
         url, _ = dialog.getOpenFileUrl(parent=widget,
@@ -136,10 +120,11 @@ def qfile(obj: Setting) -> QtWidgets.QWidget:
                                        directory=os.getcwd())
         
         if url.isValid():
+            # noinspection PyTypeChecker
             path: str = url.toDisplayString(url.RemoveScheme | url.NormalizePathSegments).lstrip("/")
             
             line.setText(path)
-            obj.value = path
+            obj.set_value(path)
         
         dialog.deleteLater()
     
@@ -153,10 +138,9 @@ def qfile(obj: Setting) -> QtWidgets.QWidget:
     
     if obj.value is not None:
         line.setText(str(obj.value))
-    
-    # Validation
-    if obj.converter != 'qfile':
-        obj.data['converter'] = 'qfile'
+
+    # Forcibly reassign the converter
+    obj.converter = 'qfile'
     
     # Signals
     button.clicked.connect(show_dialog)
@@ -165,17 +149,17 @@ def qfile(obj: Setting) -> QtWidgets.QWidget:
     return widget
 
 
-# noinspection PyArgumentList
 def qdir(obj: Setting) -> QtWidgets.QWidget:
     """Converts a settings object into a visible QWidget."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    widget = QtWidgets.QWidget(parent=parent)
+    widget = QtWidgets.QWidget()
     line = QtWidgets.QLineEdit(parent=widget)
     button = QtWidgets.QToolButton(parent=widget)
     layout = QtWidgets.QHBoxLayout(widget)
+
+    # If the widget is a top-level window, hide it.
+    if widget.isWindow():
+        widget.hide()
     
     def show_dialog():
         dialog = QtWidgets.QFileDialog()
@@ -188,7 +172,7 @@ def qdir(obj: Setting) -> QtWidgets.QWidget:
             path: str = url.toDisplayString(url.RemoveScheme | url.NormalizePathSegments).lstrip("/")
             
             line.setText(path)
-            obj.value = path
+            obj.set_value(path)
         
         dialog.deleteLater()
     
@@ -202,10 +186,9 @@ def qdir(obj: Setting) -> QtWidgets.QWidget:
     
     if obj.value is not None:
         line.setText(str(obj.value))
-    
-    # Validation
-    if obj.converter != 'qdir':
-        obj.data['converter'] = 'qdir'
+
+    # Forcibly reassign the converter
+    obj.converter = 'qdir'
     
     # Signals
     button.clicked.connect(show_dialog)
@@ -214,20 +197,20 @@ def qdir(obj: Setting) -> QtWidgets.QWidget:
     return widget
 
 
-# noinspection PyArgumentList
 def qlist(obj: Setting) -> QtWidgets.QWidget:
     """Converts a settings object into a QWidget."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    widget = QtWidgets.QWidget(parent=parent)
+    widget = QtWidgets.QWidget()
     surrogate = QtWidgets.QWidget(parent=widget)
     list_widget = QtWidgets.QListWidget(parent=widget)
     up = QtWidgets.QToolButton(parent=surrogate)
     down = QtWidgets.QToolButton(parent=surrogate)
     layout = QtWidgets.QHBoxLayout(widget)
     s_layout = QtWidgets.QVBoxLayout(surrogate)
+
+    # If the widget is a top-level window, hide it.
+    if widget.isWindow():
+        widget.hide()
     
     def move_up():
         index = list_widget.currentRow()
@@ -257,7 +240,7 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
     
     # Population
     if not isinstance(obj.value, list):
-        obj.value = [obj.value]
+        obj.set_value([obj.value])
     
     list_widget.addItems(obj.value)
     
@@ -266,10 +249,9 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
     
     layout.addWidget(list_widget)
     layout.addWidget(surrogate)
-    
-    # Validation
-    if obj.converter != 'qlist':
-        obj.data['converter'] = 'qlist'
+
+    # Forcibly reassign the converter
+    obj.converter = 'qlist'
     
     # Signals
     up.clicked.connect(move_up)
@@ -279,15 +261,11 @@ def qlist(obj: Setting) -> QtWidgets.QWidget:
     return widget
 
 
-# noinspection PyArgumentList
 def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
     """Converts a setting object into a QWidget."""
     """Converts a settings object into a QWidget."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    widget = QtWidgets.QWidget(parent=parent)
+    widget = QtWidgets.QWidget()
     surrogate = QtWidgets.QWidget(parent=widget)
     list_widget = QtWidgets.QListWidget(parent=widget)
     add = QtWidgets.QToolButton(parent=surrogate)
@@ -296,6 +274,10 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
     down = QtWidgets.QToolButton(parent=surrogate)
     layout = QtWidgets.QHBoxLayout(widget)
     s_layout = QtWidgets.QVBoxLayout(surrogate)
+
+    # If the widget is a top-level window, hide it.
+    if widget.isWindow():
+        widget.hide()
     
     def add_item():
         item = QtWidgets.QListWidgetItem()
@@ -349,7 +331,7 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
     
     # Population
     if not isinstance(obj.value, list):
-        obj.value = [str(obj.value)]
+        obj.set_value([str(obj.value)])
     
     list_widget.addItems(obj.value)
     
@@ -361,10 +343,9 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
     
     layout.addWidget(list_widget)
     layout.addWidget(surrogate)
-    
-    # Validation
-    if obj.converter != 'qaddablelist':
-        obj.data['converter'] = 'qaddablelist'
+
+    # Forcibly reassign the converter
+    obj.converter = 'qaddablelist'
     
     # Signals
     add.clicked.connect(add_item)
@@ -384,11 +365,9 @@ def qaddablelist(obj: Setting) -> QtWidgets.QWidget:
 def char(obj: Setting) -> QtWidgets.QLineEdit:
     """Converts a settings object into a QLineEdit."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    line = QtWidgets.QLineEdit(parent=parent)
-    
+    line = QtWidgets.QLineEdit()
+
+    # If the line edit is a top-level window, hide it.
     if line.isWindow():
         line.hide()
     
@@ -400,13 +379,12 @@ def char(obj: Setting) -> QtWidgets.QLineEdit:
     line.setClearButtonEnabled(obj.data.get('clear_button', False))
     line.setEchoMode(obj.data.get('echo_mode', line.NoEcho))
     line.setPlaceholderText(obj.data.get('placeholder', ''))
-    
-    # Validation
-    if obj.converter != 'char':
-        obj.data['converter'] = 'char'
+
+    # Forcibly reassign the converter
+    obj.converter = 'char'
     
     # Signals
-    line.textChanged.connect(functools.partial(setattr, obj, 'value'))
+    line.textChanged.connect(obj.set_value)
     
     # Return
     return line
@@ -415,21 +393,21 @@ def char(obj: Setting) -> QtWidgets.QLineEdit:
 def text(obj: Setting) -> QtWidgets.QTextEdit:
     """Converts a settings object into a QTextEdit."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    edit = QtWidgets.QTextEdit(parent=parent)
+    edit = QtWidgets.QTextEdit()
+
+    # If the text edit is a top-level window, hide it.
+    if edit.isWindow():
+        edit.hide()
     
     # Population
     if obj.value is not None:
         edit.setText(str(obj.value))
-    
-    # Validation
-    if obj.converter != 'text':
-        obj.data['converter'] = 'text'
+
+    # Forcibly reassign the converter
+    obj.converter = 'text'
     
     # Signals
-    edit.textChanged.connect(functools.partial(setattr, obj, 'value', edit.toPlainText()))
+    edit.textChanged.connect(functools.partial(obj.set_value, edit.toPlainText()))
     
     # Return
     return edit
@@ -438,11 +416,9 @@ def text(obj: Setting) -> QtWidgets.QTextEdit:
 def number(obj: Setting) -> QtWidgets.QSpinBox:
     """Converts a settings object into a QSpinBox."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    spin = QtWidgets.QSpinBox(parent=parent)
-    
+    spin = QtWidgets.QSpinBox()
+
+    # If the spinbox is a top-level window, hide it.
     if spin.isWindow():
         spin.hide()
     
@@ -454,13 +430,12 @@ def number(obj: Setting) -> QtWidgets.QSpinBox:
     spin.setRange(obj.data.get('minimum', -1000000), obj.data.get('maximum', 1000000))
     spin.setButtonSymbols(obj.data.get('buttons', spin.UpDownArrows))
     spin.setGroupSeparatorShown(obj.data.get('separator', False))
-    
-    # Validation
-    if obj.converter != 'number':
-        obj.data['converter'] = 'number'
+
+    # Forcibly reassign the converter
+    obj.converter = 'number'
     
     # Signals
-    spin.valueChanged.connect(functools.partial(setattr, obj, 'value'))
+    spin.valueChanged.connect(obj.set_value)
     
     # Return
     return spin
@@ -469,10 +444,11 @@ def number(obj: Setting) -> QtWidgets.QSpinBox:
 def decimal(obj: Setting) -> QtWidgets.QDoubleSpinBox:
     """Converts a settings object into a QDoubleSpinBox."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    spin = QtWidgets.QDoubleSpinBox(parent=parent)
+    spin = QtWidgets.QDoubleSpinBox()
+
+    # If the spinbox is a top-level window, hide it.
+    if spin.isWindow():
+        spin.hide()
     
     # Population
     if obj.value is not None:
@@ -482,13 +458,12 @@ def decimal(obj: Setting) -> QtWidgets.QDoubleSpinBox:
     spin.setRange(obj.data.get('minimum', -1000000), obj.data.get('maximum', 1000000))
     spin.setGroupSeparatorShown(obj.data.get('separator', False))
     spin.setButtonSymbols(obj.data.get('buttons', spin.UpDownArrows))
-    
-    # Validation
-    if obj.converter != 'decimal':
-        obj.data['converter'] = 'decimal'
+
+    # Forcibly reassign the converter
+    obj.converter = 'decimal'
     
     # Signals
-    spin.valueChanged.connect(functools.partial(setattr, obj, 'value'))
+    spin.valueChanged.connect(obj.set_value)
     
     # Return
     return spin
@@ -497,20 +472,18 @@ def decimal(obj: Setting) -> QtWidgets.QDoubleSpinBox:
 def boolean(obj: Setting) -> QtWidgets.QCheckBox:
     """Converts a settings object into a QCheckBox."""
     # Declarations
-    parent = obj.parent()
-    parent = getattr(parent, '_container', None)
-    
-    check = QtWidgets.QCheckBox(parent=parent)
-    
+    check = QtWidgets.QCheckBox()
+
+    # If the checkbox is a top-level window, hide it.
     if check.isWindow():
         check.hide()
     
     def change_value(state: int):
         if state == QtCore.Qt.PartiallyChecked or state == QtCore.Qt.Checked:
-            obj.value = True
+            obj.set_value(True)
         
         else:
-            obj.value = False
+            obj.set_value(False)
     
     # Adjustments
     check.setTristate(obj.data.get('tristate', False))
@@ -518,10 +491,9 @@ def boolean(obj: Setting) -> QtWidgets.QCheckBox:
     # Population
     if obj.value is not None:
         check.setChecked(bool(obj.value))
-    
-    # Validation
-    if obj.converter != 'boolean':
-        obj.data['converter'] = 'boolean'
+
+    # Forcibly reassign the converter
+    obj.converter = 'boolean'
     
     # Signals
     check.stateChanged.connect(change_value)
