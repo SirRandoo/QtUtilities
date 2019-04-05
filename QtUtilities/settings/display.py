@@ -302,3 +302,10 @@ class Display(QtWidgets.QDialog):
     # Magic methods
     def __getitem__(self, item: str) -> Setting:
         return self.settings.__getitem__(item)
+
+    def __contains__(self, item: str) -> bool:
+        try:
+            return bool(self.settings[item])
+    
+        except KeyError:
+            return False

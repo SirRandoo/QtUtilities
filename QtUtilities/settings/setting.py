@@ -206,3 +206,10 @@ class Setting(QtCore.QObject):
                 return child
         
         raise KeyError
+
+    def __contains__(self, item: str) -> bool:
+        try:
+            return bool(self[item])
+    
+        except KeyError:
+            return False
