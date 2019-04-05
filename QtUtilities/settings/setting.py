@@ -127,6 +127,7 @@ class Setting(QtCore.QObject):
                 child.set_parent(new_parent)
             
             else:
+                # noinspection PyTypeChecker
                 child.setParent(None)
         
         else:
@@ -143,6 +144,7 @@ class Setting(QtCore.QObject):
                     child.set_parent(new_parent)
                 
                 else:
+                    # noinspection PyTypeChecker
                     child.setParent(None)
             
             else:
