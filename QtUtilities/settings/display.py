@@ -136,6 +136,16 @@ class Display(QtWidgets.QDialog):
         for setting in self.settings.values():
             self._check_setting_ui(setting)
 
+        # Reiterate over all views to ensure QTreeWidgetItems are properly hidden
+        for view in self.view:
+            segments = view.split('/')
+            s = self.settings
+    
+            for segment in segments:
+                s = s[segment]
+    
+            self.view[view].item.setHidden(s.hidden)
+
     def _check_setting_ui(self, setting: Setting):
         """Creates a display for the settings object."""
         # Declarations
