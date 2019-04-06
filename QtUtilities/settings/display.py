@@ -145,6 +145,7 @@ class Display(QtWidgets.QDialog):
         # View validation
         if path not in self.view:
             self.view[path]: DisplayStub = SettingDisplay(None, QtWidgets.QWidget(), QtWidgets.QTreeWidgetItem())
+            self.view[path].item.setFirstColumnSpanned(True)
     
             self.stacked.addWidget(self.view[path].container)
     
