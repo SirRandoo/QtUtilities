@@ -154,7 +154,7 @@ class Display(QtWidgets.QDialog):
                 self.view[path].container.hide()
 
         # More declarations
-        view: SettingDisplay = self.view[path]
+        view: typing.Union[DisplayStub, SettingDisplay] = self.view[path]
 
         # Converter validation
         if setting.converter is not None and setting.converter in self.converters:
@@ -268,8 +268,6 @@ class Display(QtWidgets.QDialog):
             view.item.setWhatsThis(0, setting.whats_this)
             view.item.setStatusTip(0, setting.status_tip)
             view.item.setToolTip(0, setting.tooltip or None)
-    
-            # view.item.setHidden(setting.hidden)
             view.item.setText(0, setting.display_name)
 
     # Serialization
