@@ -55,6 +55,8 @@ class Display(QtWidgets.QDialog):
         # Internal attributes
         self.tree: typing.Optional[QtWidgets.QTreeWidget] = None
         self.stacked: typing.Optional[QtWidgets.QStackedWidget] = None
+        self.splitter: typing.Optional[QtWidgets.QSplitter] = None
+        self.container: typing.Optional[QtWidgets.QWidget] = None
     
         self.view: typing.Dict[str, SettingDisplay] = {}
         self.converters: typing.Dict[str, typing.Callable[[Setting], QtWidgets.QWidget]] = {
@@ -107,13 +109,6 @@ class Display(QtWidgets.QDialog):
     # Display methods
     def setup_ui(self):
         """Checks up on the display to see if any objects need to be recreated."""
-        # Declarations
-        layout: QtWidgets.QHBoxLayout = self.layout()
-
-        # Layout validation
-        if layout is None:
-            layout = QtWidgets.QHBoxLayout(self)
-
         # Widget validation
         if should_create_widget(self.tree):
             self.tree = QtWidgets.QTreeWidget()
@@ -121,16 +116,34 @@ class Display(QtWidgets.QDialog):
             self.tree.setEditTriggers(self.tree.NoEditTriggers)
     
             self.tree.setIndentation(14)
-            self.tree.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Expanding)
+            self.tree.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
             self.tree.currentItemChanged.connect(self.tree_tracker)
 
         if should_create_widget(self.stacked):
             self.stacked = QtWidgets.QStackedWidget()
             self.stacked.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
+        if should_create_widget(self.container):
+            self.container = QtWidgets.QWidget()
+
+        if should_create_widget(self.splitter):
+            self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
+
+        # Layout validation
+        layout: QtWidgets.QHBoxLayout = self.layout()
+
+        if layout is None:
+            layout = QtWidgets.QHBoxLayout(self)
+
         # Layout insertion
-        layout.addWidget(self.tree)
-        layout.addWidget(self.stacked)
+        layout.addWidget(self.splitter)
+
+        # Splitter insertion
+        if self.splitter.indexOf(self.tree) == -1:
+            self.splitter.insertWidget(0, self.tree)
+
+        if self.splitter.indexOf(self.stacked) == -1:
+            self.splitter.addWidget(self.stacked)
 
         # Setting display validation
         for setting in self.settings.values():
@@ -145,6 +158,9 @@ class Display(QtWidgets.QDialog):
                 s = s[segment]
     
             self.view[view].item.setHidden(s.hidden)
+
+        # Adjust the splitter so the display is mildly better
+        self.splitter.moveSplitter(80, 1)
 
     def _check_setting_ui(self, setting: Setting):
         """Creates a display for the settings object."""
