@@ -55,9 +55,6 @@ def wait_for_signal(signal, *, timeout: int = None):
     except Exception as e:
         logger.warning("`wait_for_signal` ended abruptly! ({})".format(str(e)))
     
-    else:
-        logger.info("`wait_for_signal` completed successfully!")
-    
     finally:
         if loop.isRunning():
             loop.quit()
