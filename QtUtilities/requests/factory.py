@@ -113,7 +113,7 @@ class Factory(QtCore.QObject):
         
         if data is not None:
             # Declarations
-            buffer: QtCore.QBuffer = None
+            buffer: typing.Optional[QtCore.QBuffer] = None
             
             # Buffer validation
             if isinstance(data, QtCore.QBuffer):
