@@ -37,13 +37,16 @@ def wait_for_signal(signal, *, timeout: int = None):
     this method will stop after `timeout` milliseconds.
     :param signal: The signal to wait for.
     :param timeout: The amount of milliseconds to wait
-    before timing out.
-    
-    :returns bool: Whether or not the signal emitted."""
+    before timing out."""
     loop = QtCore.QEventLoop()
     timer = QtCore.QTimer()
+    emitted = False
+
+    def on_emit():
+        emitted = True
     
     try:
+        signal.connect(on_emit)
         signal.connect(loop.quit)
         
         if timeout is not None:
@@ -64,6 +67,8 @@ def wait_for_signal(signal, *, timeout: int = None):
         
         loop.deleteLater()
         timer.deleteLater()
+
+    return emitted
 
 
 def wait_for_signal_and(*signals, timeout: int = None):

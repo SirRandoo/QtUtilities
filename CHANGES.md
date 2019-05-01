@@ -1,3 +1,7 @@
+# QtUtilities v0.7.1a
+
+* Fixed `wait_for_signal` not returning a boolean.
+
 # QtUtilities v0.7.0a
 
 * Switched theme classes into methods.
@@ -11,7 +15,7 @@
 * Reformatted code base to be PEP8 compliant.
 * Resolved licensing conflict.
 * Fixed the settings dialog improperly handling settings with descendants.
-* Added missing packages to the setup method.
+* Added missing packages to the prepare_ui method.
 
 # QtUtilities v0.5.0a
 
