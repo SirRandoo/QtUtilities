@@ -41,9 +41,11 @@ def wait_for_signal(signal, *, timeout: int = None):
     loop = QtCore.QEventLoop()
     timer = QtCore.QTimer()
     emitted = False
+    returnables = None
 
-    def on_emit():
+    def on_emit(*args):
         emitted = True
+        returnables = args
     
     try:
         signal.connect(on_emit)
@@ -68,7 +70,7 @@ def wait_for_signal(signal, *, timeout: int = None):
         loop.deleteLater()
         timer.deleteLater()
 
-    return emitted
+    return emitted, returnables
 
 
 def wait_for_signal_and(*signals, timeout: int = None):
