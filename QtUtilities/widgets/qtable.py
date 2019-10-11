@@ -57,6 +57,8 @@ class QTable(QtWidgets.QTableWidget):
     
     def set_horizontal_headers(self, *headers: typing.Union[str, QtWidgets.QTableWidgetItem]):
         """Sets the horizontal headers for the QTableWidget."""
+        self.setColumnCount(len(headers))
+        
         for index, header in enumerate(headers):
             if isinstance(headers, QtWidgets.QTableWidgetItem):
                 self.setHorizontalHeaderItem(index, header)
@@ -122,8 +124,8 @@ class QTable(QtWidgets.QTableWidget):
         if args:
             if len(args) > self.columnCount():
                 raise IndexError
-            
-            for column, arg in enumerate(kwargs):
+
+            for column, arg in enumerate(args):
                 if isinstance(arg, QtWidgets.QTableWidgetItem):
                     self.setItem(row, column, arg)
                 
@@ -154,8 +156,8 @@ class QTable(QtWidgets.QTableWidget):
             for column in range(self.columnCount()):
                 header: QtWidgets.QTableWidgetItem = self.horizontalHeaderItem(column)
                 item: QtWidgets.QTableWidgetItem = self.item(row, column)
-                
-                row_contents[header.text().replace(' ', '_')] = item
+
+                row_contents[header.text().replace(' ', '_')] = item.text()
             
             # Check if the contents add up
             if all([data[k] == row_contents[k] for k in data]):
