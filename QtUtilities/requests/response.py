@@ -132,7 +132,7 @@ class Response:
         h.append({k.data().decode(): v.data().decode() for k, v in headers})
         
         # Forcibly update the header list
-        object.__setattr__(self, 'headers', h)
+        object.__setattr__(self, 'all_headers', h)
     
     def _insert_url(self, url: QtCore.QUrl):
         """Inserts the passed url into the classes' url list."""
