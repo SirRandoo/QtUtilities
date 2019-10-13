@@ -36,6 +36,7 @@ setup(
         'QtUtilities',
         'QtUtilities.requests',
         'QtUtilities.widgets',
+        'QtUtilities.widgets.progress',
         'QtUtilities.settings'
     ],
     url='https://www.github.com/SirRandoo/QtUtilities',
