@@ -422,14 +422,14 @@ def number(obj: Setting) -> QtWidgets.QSpinBox:
     if spin.isWindow():
         spin.hide()
     
-    # Population
-    if obj.value is not None:
-        spin.setValue(int(obj.value))
-    
     # Adjustments
     spin.setRange(obj.data.get('minimum', -1000000), obj.data.get('maximum', 1000000))
     spin.setButtonSymbols(obj.data.get('buttons', spin.UpDownArrows))
     spin.setGroupSeparatorShown(obj.data.get('separator', False))
+
+    # Population
+    if obj.value is not None:
+        spin.setValue(int(obj.value))
 
     # Forcibly reassign the converter
     obj.converter = 'number'
@@ -450,15 +450,15 @@ def decimal(obj: Setting) -> QtWidgets.QDoubleSpinBox:
     if spin.isWindow():
         spin.hide()
     
-    # Population
-    if obj.value is not None:
-        spin.setValue(float(obj.value))
-    
     # Adjustments
     spin.setRange(obj.data.get('minimum', -1000000), obj.data.get('maximum', 1000000))
     spin.setGroupSeparatorShown(obj.data.get('separator', False))
     spin.setButtonSymbols(obj.data.get('buttons', spin.UpDownArrows))
 
+    # Population
+    if obj.value is not None:
+        spin.setValue(float(obj.value))
+        
     # Forcibly reassign the converter
     obj.converter = 'decimal'
     
