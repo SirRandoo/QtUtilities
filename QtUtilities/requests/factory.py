@@ -60,7 +60,7 @@ class Factory(QtCore.QObject):
             self._manager = QtNetwork.QNetworkAccessManager(parent=self)
     
     # Core request method
-    def request(self, op: str, url: typing.Union[QtCore.QUrl, str], *,
+    def request(self, op: str, url: typing.Union[QtCore.QUrl, str] = None, *,
                 params: typing.Dict[str, str] = None,
                 headers: typing.Dict[typing.AnyStr, typing.AnyStr] = None,
                 data: typing.Union[str, bytes, QtCore.QBuffer] = None,
